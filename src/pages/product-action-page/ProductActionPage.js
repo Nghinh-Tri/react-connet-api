@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import callAPI from "./../../utils/APICaller";
+import { addProduct, fetchProductDetail, updateProduct } from "./../../actions/Actions";
 
 class ProductActionPage extends Component {
 
@@ -19,14 +21,26 @@ class ProductActionPage extends Component {
         var { match } = this.props;
         if (match) {
             var id = match.params.id;
-            callAPI(`products/${id}`, 'GET', null).then(res => {
-                var data = res.data;
-                this.setState({
-                    id: data.id,
-                    name: data.name,
-                    price: data.price,
-                    status: data.status
-                })
+            this.props.getDetail(id);
+        }
+    }
+
+    static getDerivedStateFromProps = (nextProps, prevState) => {
+        if (nextProps.product !== prevState.product) {
+            return { product: nextProps.product };
+        }
+        return null;
+
+    }
+
+    componentDidUpdate = (prevProps, prevState) => {
+        if (prevProps.product !== this.props.product) {
+            var { id, name, price, status } = this.props.product;
+            this.setState({
+                id: id,
+                name: name,
+                price: price,
+                status: status
             })
         }
     }
@@ -44,25 +58,20 @@ class ProductActionPage extends Component {
         event.preventDefault();
         var { id, name, price, status } = this.state;
         var { history } = this.props;
+        var product = {
+            id: id,
+            name: name,
+            price: price,
+            status: status
+        }
         if (id) {   //update
-            callAPI(`products/${id}`, 'PUT', {
-                name: name,
-                price: price,
-                status: status
-            }).then(res => {
-                history.goBack();
-            })
+            this.props.updateProduct(product);
+            history.goBack();
         } else { //add new
-            callAPI('products', 'POST', {
-                name: name,
-                price: price,
-                status: status
-            }).then(res => {
-                history.goBack();
-            });
+            this.props.addProduct(product);
+            history.goBack();
         }
     }
-
 
     render() {
         var { name, price, status } = this.state;
@@ -98,4 +107,24 @@ class ProductActionPage extends Component {
     }
 }
 
-export default ProductActionPage;
+const mapStateToProps = (state) => {
+    return {
+        product: state.item
+    }
+}
+
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        addProduct: (product) => {
+            dispatch(addProduct(product))
+        },
+        getDetail: (id) => {
+            dispatch(fetchProductDetail(id))
+        },
+        updateProduct: (product) => {
+            dispatch(updateProduct(product))
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProductActionPage);

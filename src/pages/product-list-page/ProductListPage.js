@@ -2,31 +2,22 @@ import React, { Component } from 'react';
 import ProductList from "./../../components/products-list/ProductList";
 import Productitems from "./../../components/product-items/Productitems";
 import { connect } from "react-redux";
-import callAPI from "./../../utils/APICaller";
 import { Link } from 'react-router-dom';
-import { fetchProduct } from "./../../actions/Actions";
+import { fetchProduct, deleteProduct } from "./../../actions/Actions";
 
 class ProductListPage extends Component {
 
     componentDidMount = () => {
         this.props.fetchProduct();
-
-    } 
+    }
 
     onDelete = (id) => {
-        callAPI(`products/${id}`, 'DELETE', null).then(res => {
-            if (res.status === 200) {
-                this.componentDidMount();
-            }
-        })
+        this.props.deleteProduct(id);
     }
 
 
     render() {
-        this.props.fetchProduct();
-
         var { products } = this.props;
-
         return (
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <Link to='/products/add' className="btn btn-info mb-10">Add Product</Link>
@@ -63,6 +54,9 @@ const mapDispatchToProps = (dispatch, props) => {
     return {
         fetchProduct: () => {
             dispatch(fetchProduct());
+        },
+        deleteProduct: (id) => {
+            dispatch(deleteProduct(id));
         }
     }
 }

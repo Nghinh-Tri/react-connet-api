@@ -8,7 +8,7 @@ class App extends Component {
     render() {
         return (
             <Router>
-                <div>
+                <React.Fragment>
                     {/* Menu */}
                     <Menu />
                     {/* Page Content */}
@@ -17,7 +17,7 @@ class App extends Component {
                             {this.showContent(routes)}
                         </div>
                     </div>
-                </div>
+                </React.Fragment>
             </Router>
         );
     }
